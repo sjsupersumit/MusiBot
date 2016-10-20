@@ -9,6 +9,7 @@ from re import findall
 from flask import send_file
 import os
 import downloader
+from time import sleep
 
 app = Flask(__name__)
 
@@ -26,10 +27,9 @@ def get_mp3_file(query_string):
     video_id =  downloader.search_for_video(query_string)
     videoTitle = downloader.download_mp3(video_id)
 
-    fname = '/Users/sumit.jha/Documents/personal/MusiBot/downloader/' + videoTitle
-    f = open(fname, "rb")
 
-    return send_file(fname, mimetype='audio/mp3', as_attachment=True)
+    fname = '/Users/sumit.jha/Documents/personal/MusiBot/downloader/' + videoTitle
+    return send_file(fname, mimetype='audio/mpeg3', as_attachment=True)
 
 
 
