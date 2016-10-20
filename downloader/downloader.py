@@ -39,7 +39,10 @@ def download_mp3(video_id):
     }],
 }
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-        ydl.download(['http://www.youtube.com/watch?v=' + video_id + ' -k'])
+        # ydl.download(['http://www.youtube.com/watch?v=' + video_id + ' -k'])
+        info_dict = ydl.extract_info('http://www.youtube.com/watch?v=' + video_id + ' -k', download=True)
+        video_title = info_dict.get('title', None)
+        return video_title + '-' + video_id + '.mp3'
         curr_dir = os.getcwd()
 
 

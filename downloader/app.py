@@ -22,16 +22,17 @@ def index():
 def get_mp3_file(query_string):
     if len(query_string) == 0:
         return "GTH"
-    # video_id =  downloader.search_for_video("raise ")
-    # downloader.download_mp3(video_id)
 
-    fname = '/Users/sumit.jha/Documents/personal/MusiBot/downloader/Dorothy - Raise Hell-rmYyPcEQKU4.mp3'
+    video_id =  downloader.search_for_video(query_string)
+    videoTitle = downloader.download_mp3(video_id)
+
+    fname = '/Users/sumit.jha/Documents/personal/MusiBot/downloader/' + videoTitle
     f = open(fname, "rb")
 
-    return send_file(fname, mimetype='audio/mp3')
+    return send_file(fname, mimetype='audio/mp3', as_attachment=True)
 
 
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host= '0.0.0.0')
