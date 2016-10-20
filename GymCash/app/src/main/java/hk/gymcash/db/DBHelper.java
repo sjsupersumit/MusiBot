@@ -6,6 +6,8 @@ package hk.gymcash.db;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.UUID;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -17,7 +19,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public static final String DATABASE_NAME = "musi.db";
     public static final String TABLE_NAME = "songs";
-    public static final String CONTACTS_COLUMN_ID = "id";
+    public static final String COLUMN_ID = "id";
 
     public static final String SEARCH_KEYWORD = "searchkeyword";
     public static final String SONG_NAME = "songName";
@@ -37,7 +39,7 @@ public class DBHelper extends SQLiteOpenHelper {
         // TODO Auto-generated method stub
         db.execSQL(
                 "create table songs " +
-                        "(id integer primary key, songName text,searchkeyword text,fileLoc text, songstatus text)"
+                        "(id integer primary key, songName text,searchkeyword text,fileLoc text, songstatus text, songId text)"
         );
     }
 
@@ -48,7 +50,46 @@ public class DBHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public boolean insertSong  (String searchkeyword, String songName, DownloadStatus songstatus, String fileLoc)
+    public SongInfo updateSong  (String songId)
+    {
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor res =  db.rawQuery( "select * from songs where songId='"+songId+"'", null );
+        res.moveToFirst();
+
+
+
+            SongInfo songInfo = new SongInfo();
+            songInfo.setKeyword(res.getString(res.getColumnIndex(SEARCH_KEYWORD)));
+
+            songInfo.setSongName(res.getString(res.getColumnIndex(SONG_NAME)));
+
+            songInfo.setStatus(DownloadStatus.valueOf(res.getString(res.getColumnIndex(SONG_STATUS))));
+
+            songInfo.setPath(res.getString(res.getColumnIndex(FILE_LOC)));
+
+
+        return songInfo;
+
+
+
+    }
+
+    public void updateSong(String songId, String fileName, DownloadStatus done, String saveFilePath) {
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor res =  db.rawQuery( "delete from songs where songId='"+songId+"'", null );
+
+       SongInfo songInfo =  updateSong(songId);
+
+        res.moveToFirst();
+
+        insertSong(songInfo.getKeyword(), fileName, DownloadStatus.DONE, saveFilePath, UUID.randomUUID().toString());
+
+
+    }
+
+    public boolean insertSong  (String searchkeyword, String songName, DownloadStatus songstatus, String fileLoc, String songId)
     {
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -59,6 +100,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
         contentValues.put("songstatus", songstatus.name());
         contentValues.put("fileLoc", fileLoc);
+        contentValues.put("songId", songId);
 
         db.insert("songs", null, contentValues);
         return true;
@@ -105,11 +147,23 @@ public class DBHelper extends SQLiteOpenHelper {
             songInfo.setStatus(DownloadStatus.valueOf(res.getString(res.getColumnIndex(SONG_STATUS))));
 
             songInfo.setPath(res.getString(res.getColumnIndex(FILE_LOC)));
-
+            songInfo.setId(res.getInt(res.getColumnIndex(COLUMN_ID)));
             res.moveToNext();
 
             array_list.add(songInfo);
         }
         return array_list;
+    }
+
+
+    public void removeSong(Integer id) {
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor res =  db.rawQuery( "delete from songs where id="+id, null );
+
+
+
+        res.moveToFirst();
+
     }
 }
