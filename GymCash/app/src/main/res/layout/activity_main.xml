@@ -10,12 +10,13 @@
 
 <RelativeLayout
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content"  android:id="@+id/list1">
+    android:layout_height="wrap_content"  android:id="@+id/list1"
+    android:background="@drawable/background_image">
 
     <ListView
         android:id="@+id/listView1"
         android:layout_width="match_parent"
-        android:layout_height="200px"
+        android:layout_height="20000px"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"  >
     </ListView>

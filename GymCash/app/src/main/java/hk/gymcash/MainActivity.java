@@ -19,6 +19,7 @@ import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -91,10 +92,10 @@ public class MainActivity extends  AppCompatActivity
 
 
 
-        ListViewAdapter adapter=new ListViewAdapter(this, list);
+        ListViewAdapter adapter=new ListViewAdapter(this, list, songInfoList, mydb);
         listView.setAdapter(adapter);
 
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener()
+       /* listView.setOnItemClickListener(new AdapterView.OnItemClickListener()
         {
             @Override
             public void onItemClick(AdapterView<?> parent, final View view, int position, long id)
@@ -103,7 +104,7 @@ public class MainActivity extends  AppCompatActivity
                 Toast.makeText(MainActivity.this, Integer.toString(pos)+" Clicked", Toast.LENGTH_SHORT).show();
             }
 
-        });
+        });*/
 
     }
 

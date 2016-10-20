@@ -1,6 +1,9 @@
 package hk.gymcash;
 
+import android.content.Context;
 import android.content.res.AssetManager;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -14,10 +17,14 @@ import android.widget.TextView;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -77,7 +84,7 @@ public class ChatActivity extends ActionBarActivity {
 
                 messageET.setText("");
 
-                displayMessage(chatMessage);
+                displayMessage1(chatMessage);
             }
         });
     }
@@ -87,10 +94,17 @@ public class ChatActivity extends ActionBarActivity {
         adapter.notifyDataSetChanged();
         scroll();
 
-        getMessage(message.getMessage());
+       // getMessage1(message.getMessage());
+    }
+    public void displayMessage1(ChatMessage message) {
+        adapter.add(message);
+        adapter.notifyDataSetChanged();
+        scroll();
+
+        getMessage1(message.getMessage());
     }
 
-    private void getMessage(String message) {
+    private void getMessage1(final String message) {
 
         ChatMessage msg = new ChatMessage();
         msg.setId(1);
@@ -98,16 +112,26 @@ public class ChatActivity extends ActionBarActivity {
         msg.setMessage(musiBot.startChat(message));
         msg.setDate(DateFormat.getDateTimeInstance().format(new Date()));
         displayMessage(msg);
-        
-        downloadSong(message);
+
+      final  String songId = UUID.randomUUID().toString();
+        mydb.insertSong(message, "", DownloadStatus.IN_PROGRESS, null,songId );
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                downloadSong(message, songId);
+            }
+        }).start();
+
 
     }
 
-    private void downloadSong(String message) {
+    private void downloadSong(String message, String songId) {
 
-        String url = "http://192.168.70.172:5000/musicbot/download/song/" + message;
+
         try {
-            downloadFile(url, message);
+            String url = "http://192.168.90.238:5000/musicbot/download/song/" + URLEncoder.encode(message, "UTF-8");
+            downloadFile(url, message, songId);
         }catch (Exception e)
         {
             e.printStackTrace();
@@ -116,11 +140,13 @@ public class ChatActivity extends ActionBarActivity {
 
 
 
-    public  void downloadFile(String fileURL,  String keyword) throws IOException {
+    public  void downloadFile(String fileURL,  String keyword, String songId) throws IOException {
 
         System.out.println(fileURL);
         URL url = new URL(fileURL);
         HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
+        httpConn.setRequestProperty("Accept-Encoding", "identity");
+        /*httpConn.setDoOutput(true);*/
         int responseCode = httpConn.getResponseCode();
 
         // always check HTTP response code first
@@ -133,7 +159,7 @@ public class ChatActivity extends ActionBarActivity {
             System.out.println("Content-Type = " + contentType);
             System.out.println("Content-Disposition = " + disposition);
             System.out.println("Content-Length = " + contentLength);
-String fileName="";
+            String fileName="";
             if (disposition != null) {
                 // extracts file name from header field
                 int index = disposition.indexOf("filename=");
@@ -151,21 +177,27 @@ String fileName="";
 
             // opens input stream from the HTTP connection
             InputStream inputStream = httpConn.getInputStream();
-            String saveFilePath = UUID.randomUUID().toString();
+            String saveFilePath = UUID.randomUUID().toString()+".mp3";
 
-            // opens an output stream to save into file
-            FileOutputStream outputStream = new FileOutputStream(saveFilePath);
+            File sdcard = Environment.getExternalStorageDirectory();
+            File file = new File(sdcard, saveFilePath);
 
-            int bytesRead = -1;
+            FileOutputStream fileOutput = new FileOutputStream(file);
+          //  InputStream inputStream = urlConnection.getInputStream();
+
             byte[] buffer = new byte[1024];
-            while ((bytesRead = inputStream.read(buffer)) != -1) {
-                outputStream.write(buffer, 0, bytesRead);
-            }
+            int bufferLength = 0;
 
-            outputStream.close();
+            while ( (bufferLength = inputStream.read(buffer)) > 0 ) {
+                fileOutput.write(buffer, 0, bufferLength);
+            }
+            fileOutput.close();
+
             inputStream.close();
 //String searchkeyword, String songName, DownloadStatus songstatus, String fileLoc
-            mydb.insertSong(keyword, fileName, DownloadStatus.DONE, saveFilePath);
+
+            mydb.updateSong(songId, fileName, DownloadStatus.DONE, saveFilePath);
+//            mydb.insertSong(keyword, fileName, DownloadStatus.DONE, saveFilePath, songId);
             System.out.println("File downloaded");
         } else {
             System.out.println("No file to download. Server replied HTTP code: " + responseCode);
