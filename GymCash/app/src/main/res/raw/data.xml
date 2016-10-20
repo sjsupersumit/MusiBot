@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Config>
+    <State id="0">
+        <message>Hello, Welcome to MusiBot, Type in the song you love so much you want us to get it for you. ?</message>
+        <keywords>
+            <keyword target="16" variable="name" points="2">.*Song is ([a-zA-z]+).*</keyword>
+            <keyword target="16" variable="name">([a-zA-Z ]+)</keyword>
+        </keywords>
+    </State>
+
+    <State id="1">
+        <message>Type in the song you love so much you want us to get it for you. ?</message>
+        <keywords>
+            <keyword target="16" variable="name" points="2">.*Song is ([a-zA-z]+).*</keyword>
+            <keyword target="16" variable="name">([a-zA-Z ]+)</keyword>
+        </keywords>
+    </State>
+
+
+
+
+
+    <State id="16">
+        <message>Thanks, Your song will be added to your list very soon. Do you want more songs , type more</message>
+        <keyword target="1">more, D.*</keyword>
+        <keyword target="1">More , L.*</keyword>
+        <keyword target="1">fine, good, thanks, No, Not, else , other, some, thing, sonething, more, options</keyword>
+    </State>
+
+    <State id="20">
+        <message>Thanks, Your song will be added to your list very soon</message>
+        <keywords>
+
+            <keyword target="22">*</keyword>
+        </keywords>
+    </State>
+
+    <InvalidMessages>
+        <message>Huh, I didn't understand?</message>
+        <message>Sorry, I am slow!</message>
+        <message>What do you mean?</message>
+        <message>Could you explain?</message>
+        <message>Sorry about that, please explain clearly</message>
+    </InvalidMessages>
+</Config>
