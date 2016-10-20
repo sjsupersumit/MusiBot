@@ -3,6 +3,7 @@ import youtube_dl
 import os
 from bs4 import BeautifulSoup
 import urllib2
+import time
 
 YT_BASE_URL = "http://www.youtube.com/results?search_query="
 
@@ -10,10 +11,6 @@ YT_BASE_URL = "http://www.youtube.com/results?search_query="
 def main():
     video_id =  search_for_video("raise ")
     download_mp3(video_id)
-
-
-
-
 
 
 def transfer(d , copy_dir):
@@ -38,12 +35,18 @@ def download_mp3(video_id):
         'preferredquality': '192',
     }],
 }
+    fileList = [f for f in os.listdir("/Users/sumit.jha/Documents/personal/MusiBot/downloader") if f.endswith(".mp3")]
+    for f in fileList:
+        os.remove(f)
+
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-        # ydl.download(['http://www.youtube.com/watch?v=' + video_id + ' -k'])
-        info_dict = ydl.extract_info('http://www.youtube.com/watch?v=' + video_id + ' -k', download=True)
-        video_title = info_dict.get('title', None)
-        return video_title + '-' + video_id + '.mp3'
-        curr_dir = os.getcwd()
+        ydl.download(['http://www.youtube.com/watch?v=' + video_id + ' -k'])
+
+    fileList = [f for f in os.listdir("/Users/sumit.jha/Documents/personal/MusiBot/downloader") if f.endswith(".mp3")]
+    for f in fileList:
+        fname = f[:10] + '....'  + f[-4:]
+        os.rename(f, fname)
+        return fname
 
 
 def search_for_video(keyword):
